@@ -1,1 +1,75 @@
-# Your Solution
+# Write Kubernetes Deployment Script
+apiVersion: apps/v1 #Specifies the API version
+kind: Deployment #Specifies that this configuration is for a Deployment
+metadata:
+  name: book-catalog #Names the deployment
+spec:
+  replicas: 1 #Specifies only 1 replica can run
+  selector:
+    matchLabels:
+      app: book-catalog #The deployment will manage the pod that have book-catalog label
+  template:
+    metadata:
+      labels:
+        app: book-catalog #Specifies the pod label
+    spec:
+      containers: 
+      - name: book-catalog #Name the container
+        image: s224806968.azurecr.io/book-catalog:latest #Specifies the Docker image tag to 1
+        imagePullPolicy: Always
+        env: #Defines environment variables for the container.
+        - name: DATABASE_URL #Set the name
+          value: postgresql://s224806968_postgresql_ubus_user:PBGp4wBfZMslGy5oyACtETlbXm0SNZYs@dpg-crertn2j1k6c73dfr76g-a.singapore-postgres.render.com/s224806968_postgresql_ubus
+
+--- #YAML separator that separate multiple documents within the same file.
+apiVersion: v1 #Specifies the core API version
+kind: Service #Specifies that this document is for a Service
+metadata:
+  name: book-catalog #Names the service
+spec:
+  selector:
+    app: book-catalog #Links the service to pods with the book-catalog label
+  type: LoadBalancer #Specifies the type of service
+  ports:
+    - protocol: TCP #Set the protocol type
+      port: 80 #Specifies the port for the service
+      targetPort: 8000 #Maps the port 80 of the service to port 8000 on the container
+
+---
+# Deployment for inventory-management
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-management
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-management
+  template:
+    metadata:
+      labels:
+        app: inventory-management
+    spec:
+      containers:
+      - name: inventory-management
+        image: s224806968.azurecr.io/inventory-management:latest
+        imagePullPolicy: Always
+        env:
+        - name: DATABASE_URL
+          value: postgresql://s224806968_postgresql_ubus_user:PBGp4wBfZMslGy5oyACtETlbXm0SNZYs@dpg-crertn2j1k6c73dfr76g-a.singapore-postgres.render.com/s224806968_postgresql_ubus
+
+---
+# Service for inventory-management
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-management
+spec:
+  selector:
+    app: inventory-management
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 81
+      targetPort: 8001
